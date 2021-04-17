@@ -6,17 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
+#include <string.h>
 
 char type(mode_t);
 char* perm(mode_t);
 void printStat(char*, char*, struct stat*);
-//void noneOpt(DIR *);
-/*void _i();
-void _l();
-void _t();*/
 
-//struct stat st;
-//struct dirent *d;
 int main(int argc, char **argv)
 {
 	DIR *dp;
@@ -31,61 +27,48 @@ int main(int argc, char **argv)
 	{
 		dir = ".";
 		if((dp = opendir(dir))==NULL){perror(dir);}
-		//noneOpt(dp);
 		while((d=readdir(dp))!=NULL){
 			stat(d->d_name,&st);	//현재 파일의 정보를 st에 저장
-			//noneOpt(st,d);
 			if(S_ISREG(st.st_mode)|S_ISDIR(st.st_mode)){
 				count++;
 				printf("%-12s",d->d_name);
 			}
 			if(count%6==0){
 				printf("\n");
-				//count=0;
 			}
 		}
 		printf("\n");
 		closedir(dp);
 		exit(0);
-		/*while((d=readdir(dp))!=NULL){
-		sprintf(path,"%s/%s",dir,d->d_name);
-			if(lstat(path,&st)<0){
-				perror(path);
-			}
-			printStat(path,d->d_name,&st);		
-			putchar('\n');
-		}
-		closedir(dp);
-		exit(0);*/
 	}
 
-	//argc==2인 경우 -> 옵션이 주어졌거나, dir_name이 주어진 경우
-	if(argc==2)
+	//argc==2인 경우 -> 옵션이 주어졌거나, filename이 주어진 경우
+	if(argc>=2)
 	{
 		//옵션이 주어진 경우
 		if(argv[1][0]=='-'){
-			dir = ".";
+			if(argc==3){dir=argv[2];}
+			else{dir=".";}
+
 			//옵션 검사
 			while((n=getopt(argc,argv,"ilt"))!=-1){
 				switch(n){
 					case 'i':
+						//printf("dir : %s\n",dir);
 						if((dp=opendir(dir))==NULL)
 							perror(dir);
-						//i();
-						while((d=readdir(dir))!=NULL)
+						count=0;
+						while((d=readdir(dp))!=NULL)
 						{
 							count++;
 							sprintf(path,"%s/%s",dir,d->d_name);
 							if(lstat(path,&st)<0)
 								perror(path);
 							printf("%d ",(int)d->d_ino);
-							printf("-10s",d->d_name);
-							if(count%6==0) printf("\n");
-							//printf("%d %-10s",(int)d->d_ino,d->d_name);//inode와 이름 출력
-							
+							printf("%-12s",d->d_name);
+							if(count%3==0) printf("\n");
 						}
 						closedir(dp);
-						printf("option : i\n");
 						break;
 					case 'l':
 						printf("option : l\n");
@@ -164,18 +147,3 @@ char *perm(mode_t mode){
 	}
 	return(perms);
 }
-
-//옵션이 없는 경우
-/*void noneOpt(DIR* dp){
-	int count = 0;
-	while((d=readdir(dp))!=NULL){
-		stat(d->d_name,&st);
-		if(S_ISREG(st.st_mode)){
-			count++;
-			printf("%-12s",d->d_name);
-		}
-		if(count%6==0){
-			printf("\n");
-		}
-	}
-}*/
