@@ -38,7 +38,7 @@ int main(int argc, char** argv){
 				case 'l':
 					if(argc==2) {dir=".";}
 					else dir = argv[2];
-					ls_i(dir);
+					ls_l(dir);
 					break;
 				case 't':
 					if(argc==2) {dir=".";}
@@ -96,7 +96,6 @@ void ls_i(char* dir){
         struct stat st;
         struct dirent *d;
         int count=0;
-
 	if(lstat(dir,&st)<0) {perror("lstat error\n");}
 	
 	//일반 파일인 경우
@@ -121,9 +120,31 @@ void ls_i(char* dir){
 	}
 }
 void ls_l(char* dir){
-	printf("Option : -l\n");
-        printf("dir : %s\n",dir);
+	//printf("Option : -l\n");
+        //printf("dir : %s\n",dir);
 
+	DIR *dp;
+        struct stat st;
+        struct dirent *d;
+        char path[1024];
+
+        if(lstat(dir,&st)<0) {perror("lstat error\n");}
+
+        //일반 파일인 경우
+        if(S_ISREG(st.st_mode)){
+                printStat(path,dir,&st);
+        }
+
+        //디렉토리 파일인 경우
+        else if(S_ISDIR(st.st_mode)){
+                if((dp=opendir(dir))==NULL){perror(dir);}
+                while((d=readdir(dp))!=NULL){
+			sprintf(path,"%s/%s",dir,d->d_name);
+			if(lstat(path,&st)<0){perror(path);}
+			printStat(path,d->d_name,&st);
+                }
+                closedir(dp);
+	}
 }
 void ls_t(char* dir){
 	printf("Option : -t\n");
@@ -155,7 +176,7 @@ char type(mode_t mode){
 //파일 사용권한을 리턴
 char *perm(mode_t mode){
 	int i;
-	static char perms[10]="----------";
+	static char perms[10]="---------";
 	for(i=0;i<3;i++){
 		if(mode & (S_IRUSR>>i*3))
 			perms[i*3]='r';
