@@ -16,6 +16,19 @@ void ls_i(char*);
 void ls_l(char*);
 void ls_t(char*);
 
+struct file{
+	char fname[10];
+	time_t mtime;
+};
+
+int compare(const void *m,const void*n){
+	struct file* s1 = (struct file*)m;
+	struct file* s2 = (struct file*)n;
+
+	return (s1->mtime)<(s2->mtime);
+
+}
+
 int main(int argc, char** argv){
 	
 	char *dir;
@@ -156,18 +169,9 @@ void ls_t(char* dir){
         struct stat st;
         struct dirent *d;
         int count=0;
-
-	/*char **path;
-	char **fname;
-	char *temp;
-	struct stat* sbuf;
-	struct stat s_temp;*/
-
-	char path[100][1024];
-        char fname[100][1024];
-        char temp[1024];
-        struct stat sbuf[100];
-        struct stat s_temp;
+	char path[1024];
+	
+	struct file myfile[200];
 
         if(lstat(dir,&st)<0) {perror("lstat error\n");}
 
@@ -177,29 +181,19 @@ void ls_t(char* dir){
 	else if(S_ISDIR(st.st_mode)){
 		if((dp = opendir(dir))==NULL){perror(dir);}
 		while((d = readdir(dp))!=NULL){
-			sprintf(path[count],"%s/%s",dir,d->d_name);
-			sprintf(fname[count],"%s",d->d_name);
-			if(lstat(path[count],&sbuf[count])<0){perror("lstat error");}
-			count++;	
+			sprintf(path,"%s/%s",dir,d->d_name);
+			if(lstat(path,&st)<0){perror(path);}
+			
+			strcpy(myfile[count].fname,d->d_name);
+			myfile[count].mtime = st.st_mtime;
+			count++;
 		}
-		
-		for(int i=0;i<count;i++){
-			for(int j=i+1;j<count;j++){
-				if(sbuf[i].st_mtime<sbuf[j].st_mtime){
-					strcpy(temp,fname[i]);
-					strcpy(fname[i],fname[j]);
-					strcpy(fname[j],temp);
 
-					s_temp = sbuf[i];
-					sbuf[i] = sbuf[j];
-					sbuf[j] = s_temp;
-				}
-			}
-		}
+		qsort(myfile,count,sizeof(myfile[0]),compare);
 
 		int cnt=0;
 		for(int i=0;i<count;i++){
-			printf("%-12s",fname[i]);
+			printf("%-12s",myfile[i].fname);
 			cnt++;
 			if(cnt!=0&&cnt%6==0){
 				printf("\n");
