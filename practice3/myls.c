@@ -32,12 +32,12 @@ int main(int argc, char** argv){
 			switch(n){
 				case 'i':
 					if(argc==2) {dir=".";}
-					else dir = argv[2];	//
+					else dir = argv[2];
 					ls_i(dir);
 					break;
 				case 'l':
 					if(argc==2) {dir=".";}
-					else dir = argv[2];	//
+					else dir = argv[2];
 					ls_i(dir);
 					break;
 				case 't':
@@ -59,9 +59,34 @@ int main(int argc, char** argv){
 }
 
 void noneOpt(char* dir){
-	printf("Option : none\n");
-	printf("dir : %s\n",dir);
+	//printf("Option : none\n");
+	//printf("dir : %s\n",dir);
+
+	DIR *dp;
+	struct stat st;
+	struct dirent *d;
+	int count=0;
+
+	if(lstat(dir,&st)<0) {perror("lstat error\n");}
+
+	//일반 파일인 경우
+	if(S_ISREG(st.st_mode)) {printf("%s\n",dir);}
+
+	//디렉토리 파일인 경우
+	if(S_ISDIR(st.st_mode)){
+		if((dp = opendir(dir))==NULL){perror(dir);}
+		while((d=readdir(dp))!=NULL){
+			printf("%-12s",d->d_name);
+			count++;
+
+			if(count!=0&&count%6==0){
+				printf("\n");
+			}
+		}
+		printf("\n");
+	}
 }
+
 void ls_i(char* dir){
 	printf("Option : -i\n");
 	printf("dir : %s\n",dir);
