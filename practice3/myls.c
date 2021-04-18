@@ -84,12 +84,41 @@ void noneOpt(char* dir){
 			}
 		}
 		printf("\n");
+		closedir(dp);
 	}
 }
 
 void ls_i(char* dir){
-	printf("Option : -i\n");
-	printf("dir : %s\n",dir);
+	//printf("Option : -i\n");
+	//printf("dir : %s\n",dir);
+
+	DIR *dp;
+        struct stat st;
+        struct dirent *d;
+        int count=0;
+
+	if(lstat(dir,&st)<0) {perror("lstat error\n");}
+	
+	//일반 파일인 경우
+	if(S_ISREG(st.st_mode)){
+		printf("%d ",(int)st.st_ino);
+		printf("%s\n",dir);
+	}
+
+	//디렉토리 파일인 경우
+	else if(S_ISDIR(st.st_mode)){
+		if((dp=opendir(dir))==NULL){perror(dir);}
+		while((d=readdir(dp))!=NULL){
+			printf("%d ",(int)d->d_ino);
+			printf("%-12s",d->d_name);
+			count++;
+
+			if(count!=0&&count%3==0){
+				printf("\n");
+			}
+		}
+		closedir(dp);
+	}
 }
 void ls_l(char* dir){
 	printf("Option : -l\n");
