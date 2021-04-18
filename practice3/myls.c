@@ -97,7 +97,7 @@ void ls_i(char* dir){
         struct dirent *d;
         int count=0;
 	if(lstat(dir,&st)<0) {perror("lstat error\n");}
-	
+
 	//일반 파일인 경우
 	if(S_ISREG(st.st_mode)){
 		printf("%d ",(int)st.st_ino);
@@ -119,6 +119,7 @@ void ls_i(char* dir){
 		closedir(dp);
 	}
 }
+
 void ls_l(char* dir){
 	//printf("Option : -l\n");
         //printf("dir : %s\n",dir);
@@ -146,9 +147,68 @@ void ls_l(char* dir){
                 closedir(dp);
 	}
 }
+
 void ls_t(char* dir){
-	printf("Option : -t\n");
-        printf("dir : %s\n",dir);
+	//printf("Option : -t\n");
+        //printf("dir : %s\n",dir);
+	
+	DIR *dp;
+        struct stat st;
+        struct dirent *d;
+        int count=0;
+
+	/*char **path;
+	char **fname;
+	char *temp;
+	struct stat* sbuf;
+	struct stat s_temp;*/
+
+	char path[100][1024];
+        char fname[100][1024];
+        char temp[1024];
+        struct stat sbuf[100];
+        struct stat s_temp;
+
+        if(lstat(dir,&st)<0) {perror("lstat error\n");}
+
+        //일반 파일인 경우
+        if(S_ISREG(st.st_mode)) {printf("%s\n",dir);}
+	//디렉토리 파일인 경우
+	else if(S_ISDIR(st.st_mode)){
+		if((dp = opendir(dir))==NULL){perror(dir);}
+		while((d = readdir(dp))!=NULL){
+			sprintf(path[count],"%s/%s",dir,d->d_name);
+			sprintf(fname[count],"%s",d->d_name);
+			if(lstat(path[count],&sbuf[count])<0){perror("lstat error");}
+			count++;	
+		}
+		
+		for(int i=0;i<count;i++){
+			for(int j=i+1;j<count;j++){
+				if(sbuf[i].st_mtime<sbuf[j].st_mtime){
+					strcpy(temp,fname[i]);
+					strcpy(fname[i],fname[j]);
+					strcpy(fname[j],temp);
+
+					s_temp = sbuf[i];
+					sbuf[i] = sbuf[j];
+					sbuf[j] = s_temp;
+				}
+			}
+		}
+
+		int cnt=0;
+		for(int i=0;i<count;i++){
+			printf("%-12s",fname[i]);
+			cnt++;
+			if(cnt!=0&&cnt%6==0){
+				printf("\n");
+			}
+		}
+		printf("\n");
+		closedir(dp);
+	}
+
 }
 
 //파일 상태 정보를 출력
