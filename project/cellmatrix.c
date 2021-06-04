@@ -186,7 +186,7 @@ void seq(FILE* fp, int gennum){
 	gettimeofday(&end,NULL);
 
 	// 총 수행시간 출력
-	diff = end.tv_usec - start.tv_usec;
+	diff = (end.tv_sec-start.tv_sec)*1000000+end.tv_usec-start.tv_usec;
 	printf("수행 시간 : %lf (ms)\n\n",diff);
 	return;
 }
@@ -223,7 +223,6 @@ void process(FILE* fp, int childnum, int gennum){
 		sum+=per_process[i];
 	}
 	
-	// 각각의 프로세스에서 만들어지는 output을 어떻게 처리하지 !?
 	// 자식 프로세스 생성(childnum만큼 반복하며 fork())
 	for(int gen=0;gen<gennum;gen++){
 		printf("\n-- %d세대 진행에 사용한 프로세스 ID --\n",gen+1);
@@ -291,7 +290,7 @@ void process(FILE* fp, int childnum, int gennum){
 	gettimeofday(&end,NULL);
 	
 	// 총 수행시간 출력
-	diff = end.tv_usec - start.tv_usec;
+	diff = (end.tv_sec-start.tv_sec)*1000000+end.tv_usec-start.tv_usec;
 	printf("\n수행 시간 : %lf (ms)\n\n",diff);
 	return;
 }
@@ -326,7 +325,7 @@ void thread(FILE* fp, int total_thread, int gennum){
 
         // 스레드 생성(total_thread만큼 반복하며 pthread_create())
         for(int gen=0;gen<gennum;gen++){
-		printf("\n-- %d 세대 진행에 사용한 thread ID --\n",gen);
+		printf("\n-- %d 세대 진행에 사용한 thread ID --\n",gen+1);
                 output = (int**) malloc(sizeof(int*) * m);
                 for(int i=0;i<m;i++){
                         output[i] = (int*)malloc(sizeof(int)*n);
@@ -372,7 +371,7 @@ void thread(FILE* fp, int total_thread, int gennum){
 	gettimeofday(&end,NULL);
 
 	// 총 수행시간 출력
-	diff = end.tv_usec - start.tv_usec;
+	diff = (end.tv_sec-start.tv_sec)*1000000+end.tv_usec-start.tv_usec;
 	printf("\n수행 시간 : %lf (ms)\n\n",diff);
 	return;
 }
