@@ -25,15 +25,15 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	sleep(5);
+	sleep(5);i
 	while(1){
 		if(numofchild==0){
 			printf("모든 프로세스 종료됨\n");
 			raise(SIGKILL);
 		}
 
-		kill(pids[numofchild-1],SIGKILL);
 		sleep(1);
+		kill(pids[numofchild-1],SIGKILL);
 
 		numofchild--;
 	}
